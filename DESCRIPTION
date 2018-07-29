@@ -1,0 +1,12 @@
+Package: JP.fraudDetection
+Title: What The Package Does (one line, title case required)
+Version: 0.1
+Authors@R: person("Jonathan", "Phelps", email = "jphelps130591@gmail.com",
+                  role = c("aut", "cre"))
+Description: --
+Depends: R (>= 3.5.0)
+Imports:
+    data.table
+License: NA
+LazyData: true
+RoxygenNote: 6.0.1

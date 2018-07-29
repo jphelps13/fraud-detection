@@ -1,0 +1,77 @@
+---
+title: "fraud-detection-vignette"
+author: "JP"
+date: "29 July 2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Setup
+
+Re-creation and expansion of [this blog](https://blog.codecentric.de/en/2017/09/data-science-fraud-detection/) 
+
+Get data from [kaggle-data](https://www.kaggle.com/ntnu-testimon/paysim1).
+Save in to the `\data` folder in the root of the repo and unzip. Re-name to 
+`fd_data.csv`.
+
+Get functions
+```{r}
+# LINE FOR INSTALLING FROM GITHUB HERE
+library(JP.fraudDetection)
+
+# remove once dependencies setup
+library(data.table)
+library(ggplot2)
+library(ggridges)
+```
+
+
+## Data
+
+```{r}
+# load data
+location = file.path(getwd(), "../data")
+file = "fd_data.csv"
+dt <- fread(file.path(location, file),
+            colClasses = list(character=c("type","nameOrig","nameDest"),
+                              numeric=c("amount","oldbalanceOrg","newbalanceOrig",
+                                        "oldbalanceDest","newbalanceDest"),
+                              integer=c("step","isFlaggedFraud"),
+                              factor=c("isFraud"))
+)
+head(dt)
+dim(dt)
+# imbalance in classes: fraud is uncommon
+dt[, .(.N, prop = .N/nrow(dt)), by = isFraud]
+```
+
+
+## Plots
+sample the data for plotting, to save memory and speed
+```{r}
+p = 0.2
+set.seed(1)
+sample_dt <- rbindlist(list(dt[isFraud == 1,],
+                            dt[isFraud == 0,][sample(1:.N, size = floor(.N*p)),])) 
+sample_dt[, logAmount := log(amount + 1)]
+```
+
+Can see the amount is higher usually in Fraudulent cases
+```{r}
+pl <- ggplot(sample_dt, aes(x = logAmount, y = isFraud)) + 
+  geom_density_ridges(fill = "goldenrod1") + theme_minimal()
+pl
+```
+
+Only affects Transfer and Cash_out types of purchases
+```{r}
+pl <- ggplot(sample_dt, aes(x = logAmount, y = type, fill = isFraud)) + 
+  geom_density_ridges(alpha = .6) + theme_minimal()
+pl
+prop_types <- dt[type %in% c("TRANSFER", "CASH_OUT"), .N/nrow(dt)]
+```
+
+These make up `r round(prop_types*100, 1)`% of the data 

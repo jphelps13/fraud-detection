@@ -1,0 +1,4 @@
+# Exceptions
+*.Rproj
+.Rproj.user
+.Rhistory

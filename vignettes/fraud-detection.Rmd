@@ -33,7 +33,7 @@ library(ggridges)
 
 ```{r}
 # load data
-location = file.path(getwd(), "../data")
+location = file.path(getwd(), "/data")
 file = "fd_data.csv"
 dt <- fread(file.path(location, file),
             colClasses = list(character=c("type","nameOrig","nameDest"),
